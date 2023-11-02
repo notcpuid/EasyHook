@@ -31,9 +31,6 @@ In this concept, only data is intercepted and subsequently written to a file, fo
 ### Log example:
 ![pic](https://i.imgur.com/ZzGJXE1.png)
 
-### Address DLL example:
-![pic](https://i.imgur.com/ZzGJXE1.png)
-
 contributions are welcome.
 
 ### Credits:
