@@ -30,6 +30,13 @@ INT __stdcall WriteProcessMemory_h(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOI
 		myfile << "[ > ] WriteProcessMemory from [0x" << lpBuffer << "]" << " >> [0x" << lpBaseAddress << "] : " << nSize << std::endl;
 		myfile.close();
 
+		std::ofstream mydll;
+		mydll.open(depends::PathToSave("\\dumped_image.dll"), std::ios_base::app | std::ios::binary);
+		if (mydll.is_open()) {
+			mydll.write(reinterpret_cast<const char*>(lpBuffer), nSize);
+			mydll.close();
+		}
+
 		return original_fn;
 	}
 };
