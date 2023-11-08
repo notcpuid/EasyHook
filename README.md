@@ -16,6 +16,7 @@ In this concept, only data is intercepted and subsequently written to a file, fo
 ### Features:
 - [x] CreateRemoteThread & WriteProcessMemory & VirtualAlloc(-Ex) & NtWriteVirtualMemory & LoadLibraryA hooking
 - [x] Recording the most important data that the original function transmits
+- [x] Auto dump and save written image into the process
 
 ### How to use?
 - Inject hooker into target process before invoke EP
