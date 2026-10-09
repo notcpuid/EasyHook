@@ -5,26 +5,28 @@
 easyhook::hook32 hooker;
 
 HMODULE __stdcall LoadLibraryA_h(LPCSTR lpLibFileName) {
-	
-	if (LoadLibraryA_t) {
-		HMODULE original_fn = LoadLibraryA_t(lpLibFileName);
+	if (!LoadLibraryA_t)
+		return NULL;
 
-		std::ofstream myfile;
-		myfile.open(depends::PathToSave("\\log.txt"), std::ios_base::app);
-		myfile << "[ > ] Module [" << lpLibFileName << "] loaded via LoadLibraryA" << std::endl;
-		myfile.close();
+	HMODULE original_fn = LoadLibraryA_t(lpLibFileName);
 
-		return original_fn;
-	}
+	std::ofstream myfile;
+	myfile.open(depends::PathToSave("\\log.txt"), std::ios_base::app);
+	myfile << "[ > ] Module [" << lpLibFileName << "] loaded via LoadLibraryA" << std::endl;
+	myfile.close();
+
+	return original_fn;
 }
 
 INT __stdcall WriteProcessMemory_h(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, 
 	SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten) {
 
-	if (WriteProcessMemory_t && nSize > 0) {
+	if (!WriteProcessMemory_t)
+		return FALSE;
 
-		INT original_fn = WriteProcessMemory_t(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+	INT original_fn = WriteProcessMemory_t(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
 
+	if (nSize > 0) {
 		std::ofstream myfile;
 		myfile.open(depends::PathToSave("\\log.txt"), std::ios_base::app);
 		myfile << "[ > ] WriteProcessMemory from [0x" << lpBuffer << "]" << " >> [0x" << lpBaseAddress << "] : " << nSize << std::endl;
@@ -36,32 +38,38 @@ INT __stdcall WriteProcessMemory_h(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOI
 			mydll.write(reinterpret_cast<const char*>(lpBuffer), nSize);
 			mydll.close();
 		}
-
-		return original_fn;
 	}
+
+	return original_fn;
 };
 
 INT __stdcall NtWriteVirtualMemory_h(HANDLE pHandle, PVOID BaseAddress, PVOID Buffer, 
 	ULONG NumberOfBytesToWrite, PULONG NumberOfBytesWritten) {
 
-	if (NtWriteVirtualMemory_t && NumberOfBytesToWrite > 0) {
-		INT original_fn = NtWriteVirtualMemory_t(pHandle, BaseAddress, Buffer, NumberOfBytesToWrite, NumberOfBytesWritten);
+	if (!NtWriteVirtualMemory_t)
+		return static_cast<INT>(0xC0000001UL);
 
+	INT original_fn = NtWriteVirtualMemory_t(pHandle, BaseAddress, Buffer, NumberOfBytesToWrite, NumberOfBytesWritten);
+
+	if (NumberOfBytesToWrite > 0) {
 		std::ofstream myfile;
 		myfile.open(depends::PathToSave("\\log.txt"), std::ios_base::app);
 		myfile << "[ > ] NtWriteVirtualMemory from [0x" << Buffer << "]" << " >> [0x" << BaseAddress << "] : " << NumberOfBytesToWrite << std::endl;
 		myfile.close();
-
-		return original_fn;
 	}
+
+	return original_fn;
 };
 
 LPVOID __stdcall VirtualAllocEx_h(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, 
 	DWORD flAllocationType, DWORD flProtect) {
 
-	if (VirtualAllocEx_t && dwSize > 0) { 
-		LPVOID original_fn = VirtualAllocEx_t(hProcess, lpAddress, dwSize, flAllocationType, flProtect);
+	if (!VirtualAllocEx_t)
+		return NULL;
+
+	LPVOID original_fn = VirtualAllocEx_t(hProcess, lpAddress, dwSize, flAllocationType, flProtect);
 		
+	if (dwSize > 0) {
 		std::ofstream myfile;
 		myfile.open(depends::PathToSave("\\log.txt"), std::ios_base::app);
 
@@ -74,40 +82,44 @@ LPVOID __stdcall VirtualAllocEx_h(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSi
 		*/
 		myfile << "[ > ] VirtualAllocEx at [0x" << original_fn << "]" << " : " << dwSize << std::endl;
 		myfile.close();
-
-		return original_fn;
 	}
+
+	return original_fn;
 }
 
 LPVOID __stdcall VirtualAlloc_h(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect) {
 
-	if (VirtualAlloc_t && dwSize > 0) {
-		LPVOID original_fn = VirtualAlloc_t(lpAddress, dwSize, flAllocationType, flProtect);
+	if (!VirtualAlloc_t)
+		return NULL;
+
+	LPVOID original_fn = VirtualAlloc_t(lpAddress, dwSize, flAllocationType, flProtect);
 		
+	if (dwSize > 0) {
 		std::ofstream myfile;
 		myfile.open(depends::PathToSave("\\log.txt"), std::ios_base::app);
 		myfile << "[ > ] VirtualAlloc at [0x" << original_fn << "]" << " : " << dwSize << std::endl;
 		myfile.close();
-
-		return original_fn;
 	}
+
+	return original_fn;
 }
 
 HANDLE __stdcall CreateRemoteThread_h(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize,
 	LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, 
 	LPDWORD lpThreadId) {
 
-	if (CreateRemoteThread_t) {
-		HANDLE original_fn = CreateRemoteThread_t(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter, dwCreationFlags, lpThreadId);
-		
-		std::ofstream myfile;
-		myfile.open(depends::PathToSave("\\log.txt"), std::ios_base::app);
-		myfile << "[ > ] CreateRemoteThread called with parameter [" << lpParameter << "] " << "remote address [0x" << lpStartAddress << "]" 
-			<< " PE allocated address [0x" << reinterpret_cast<LPVOID>(reinterpret_cast<char*>(lpStartAddress) - 0x1001C) << "]" << std::endl;
-		myfile.close();
+	if (!CreateRemoteThread_t)
+		return NULL;
 
-		return original_fn;
-	}
+	HANDLE original_fn = CreateRemoteThread_t(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter, dwCreationFlags, lpThreadId);
+		
+	std::ofstream myfile;
+	myfile.open(depends::PathToSave("\\log.txt"), std::ios_base::app);
+	myfile << "[ > ] CreateRemoteThread called with parameter [" << lpParameter << "] " << "remote address [0x" << lpStartAddress << "]"
+		<< " PE allocated address [0x" << reinterpret_cast<LPVOID>(reinterpret_cast<char*>(lpStartAddress) - 0x1001C) << "]" << std::endl;
+	myfile.close();
+
+	return original_fn;
 }
 
 void HookContext() {

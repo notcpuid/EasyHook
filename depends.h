@@ -1,14 +1,18 @@
 #pragma once
 #include "context.h"
+#include <string>
+#include <vector>
 
 namespace depends {
-    char* PathToSave(char* addDirectory) {
-        char buffer[256];
-        GetCurrentDirectoryA(sizeof(buffer), buffer);
-        char dest[512];
-        strcpy(dest, buffer);
-        strcat(dest, addDirectory);
-
-        return _strdup(dest);
+    std::string PathToSave(const char* addDirectory) {
+        std::vector<char> buffer(MAX_PATH);
+        for (;;) {
+            const DWORD length = GetCurrentDirectoryA(static_cast<DWORD>(buffer.size()), buffer.data());
+            if (length == 0)
+                return addDirectory;
+            if (length < buffer.size())
+                return std::string(buffer.data(), length) + addDirectory;
+            buffer.resize(length);
+        }
     }
 }
